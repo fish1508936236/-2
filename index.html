@@ -493,10 +493,108 @@
     padding: 14px;
     font-size: 13px;
     line-height: 1.7;
-    white-space: pre-wrap;
+    white-space: normal;
     color: var(--text-main);
     max-height: 300px;
     overflow-y: auto;
+  }
+
+  /* 导出与打印共用的粉色汇总样式 */
+  .p-page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: #5A4A54;
+    padding: 8px;
+  }
+  .p-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #E5547D;
+    margin-bottom: 4px;
+  }
+  .p-sub {
+    font-size: 12px;
+    color: #8A7886;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #FFD6E4;
+  }
+  .p-day {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #FFF7FA;
+    border: 1px solid #FFE3EE;
+  }
+  .p-day-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .p-day-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: #E5547D;
+  }
+  .p-day-week {
+    font-size: 11px;
+    color: #F56AA1;
+  }
+  .p-day-total {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: #7A8FB5;
+  }
+  .p-task {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    padding: 3px 0;
+  }
+  .p-status {
+    display: inline-block;
+    width: 16px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .p-status-done { color: #2FBF71; }
+  .p-status-doing { color: #F0A500; }
+  .p-status-none { color: #C4B8C0; }
+  .p-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #5A4A54;
+  }
+  .p-min {
+    font-size: 12px;
+    font-weight: 600;
+    color: #F56AA1;
+    margin-left: 8px;
+  }
+  .p-review {
+    width: 100%;
+    font-size: 11px;
+    font-weight: 400;
+    font-style: italic;
+    color: #8A7886;
+    margin-top: 2px;
+    padding-left: 16px;
+  }
+  .p-legend {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed #FFD6E4;
+    font-size: 11px;
+    color: #8A7886;
+    display: flex;
+    gap: 16px;
+  }
+  .p-empty {
+    font-size: 14px;
+    color: #8A7886;
+    padding: 20px 0;
+    text-align: center;
   }
 
   /* Print */
@@ -506,106 +604,11 @@
     body { background: #fff !important; padding: 0 !important; }
     #app { display: none !important; }
     #dayModal { display: none !important; }
+    #exportArea { display: none !important; }
     #printContainer {
       display: block !important;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-    }
-    .p-page {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      color: #5A4A54;
-      padding: 8px;
-    }
-    .p-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: #E5547D;
-      margin-bottom: 4px;
-    }
-    .p-sub {
-      font-size: 12px;
-      color: #8A7886;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #FFD6E4;
-    }
-    .p-day {
-      margin-bottom: 12px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: #FFF7FA;
-      border: 1px solid #FFE3EE;
-    }
-    .p-day-head {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-    .p-day-num {
-      font-size: 16px;
-      font-weight: 700;
-      color: #E5547D;
-    }
-    .p-day-week {
-      font-size: 11px;
-      color: #F56AA1;
-    }
-    .p-day-total {
-      margin-left: auto;
-      font-size: 12px;
-      font-weight: 600;
-      color: #7A8FB5;
-    }
-    .p-task {
-      display: flex;
-      align-items: baseline;
-      flex-wrap: wrap;
-      padding: 3px 0;
-    }
-    .p-status {
-      display: inline-block;
-      width: 16px;
-      font-weight: 700;
-      font-size: 13px;
-    }
-    .p-status-done { color: #2FBF71; }
-    .p-status-doing { color: #F0A500; }
-    .p-status-none { color: #C4B8C0; }
-    .p-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #5A4A54;
-    }
-    .p-min {
-      font-size: 12px;
-      font-weight: 600;
-      color: #F56AA1;
-      margin-left: 8px;
-    }
-    .p-review {
-      width: 100%;
-      font-size: 11px;
-      font-weight: 400;
-      font-style: italic;
-      color: #8A7886;
-      margin-top: 2px;
-      padding-left: 16px;
-    }
-    .p-legend {
-      margin-top: 14px;
-      padding-top: 10px;
-      border-top: 1px dashed #FFD6E4;
-      font-size: 11px;
-      color: #8A7886;
-      display: flex;
-      gap: 16px;
-    }
-    .p-empty {
-      font-size: 14px;
-      color: #8A7886;
-      padding: 20px 0;
-      text-align: center;
     }
   }
 
@@ -1234,9 +1237,8 @@
   }
 
   exportBtn.addEventListener("click", () => {
-    const text = buildMonthSummary();
     exportArea.style.display = "block";
-    exportArea.textContent = text;
+    exportArea.innerHTML = buildPrintHTML();
   });
 
   function buildPrintHTML() {
