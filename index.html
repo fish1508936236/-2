@@ -508,11 +508,104 @@
     #dayModal { display: none !important; }
     #printContainer {
       display: block !important;
-      color: #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .p-page {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: #5A4A54;
+      padding: 8px;
+    }
+    .p-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #E5547D;
+      margin-bottom: 4px;
+    }
+    .p-sub {
+      font-size: 12px;
+      color: #8A7886;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #FFD6E4;
+    }
+    .p-day {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #FFF7FA;
+      border: 1px solid #FFE3EE;
+    }
+    .p-day-head {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .p-day-num {
+      font-size: 16px;
+      font-weight: 700;
+      color: #E5547D;
+    }
+    .p-day-week {
+      font-size: 11px;
+      color: #F56AA1;
+    }
+    .p-day-total {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7A8FB5;
+    }
+    .p-task {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      padding: 3px 0;
+    }
+    .p-status {
+      display: inline-block;
+      width: 16px;
+      font-weight: 700;
       font-size: 13px;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      word-break: break-all;
+    }
+    .p-status-done { color: #2FBF71; }
+    .p-status-doing { color: #F0A500; }
+    .p-status-none { color: #C4B8C0; }
+    .p-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #5A4A54;
+    }
+    .p-min {
+      font-size: 12px;
+      font-weight: 600;
+      color: #F56AA1;
+      margin-left: 8px;
+    }
+    .p-review {
+      width: 100%;
+      font-size: 11px;
+      font-weight: 400;
+      font-style: italic;
+      color: #8A7886;
+      margin-top: 2px;
+      padding-left: 16px;
+    }
+    .p-legend {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px dashed #FFD6E4;
+      font-size: 11px;
+      color: #8A7886;
+      display: flex;
+      gap: 16px;
+    }
+    .p-empty {
+      font-size: 14px;
+      color: #8A7886;
+      padding: 20px 0;
+      text-align: center;
     }
   }
 
@@ -571,6 +664,7 @@
         <button class="btn btn-secondary" id="pause">暂停</button>
         <button class="btn btn-ghost" id="add20">+20</button>
         <button class="btn btn-ghost" id="reset">重置</button>
+        <button class="btn btn-ghost" id="testSound">🔔 试听</button>
       </div>
     </div>
 
@@ -670,7 +764,8 @@
       totalSeconds: 25 * 60,
       baseSeconds: 25 * 60,
       addedSeconds: 0,
-      running: false
+      running: false,
+      endAt: null
     }
   };
 
@@ -735,9 +830,10 @@
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     const notes = [
-      { f: 880, t: 0, d: 0.18 },
-      { f: 1174.66, t: 0.22, d: 0.18 },
-      { f: 1567.98, t: 0.44, d: 0.32 }
+      { f: 880, t: 0, d: 0.2 },
+      { f: 1174.66, t: 0.24, d: 0.2 },
+      { f: 1567.98, t: 0.48, d: 0.22 },
+      { f: 1318.51, t: 0.74, d: 0.5 }
     ];
     notes.forEach(n => {
       const osc = audioCtx.createOscillator();
@@ -745,7 +841,7 @@
       osc.type = "sine";
       osc.frequency.value = n.f;
       gain.gain.setValueAtTime(0.0001, now + n.t);
-      gain.gain.exponentialRampToValueAtTime(0.5, now + n.t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.6, now + n.t + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -755,39 +851,70 @@
   }
 
   function tick() {
-    if (data.timer.totalSeconds > 0) {
+    if (data.timer.endAt) {
+      const remainMs = data.timer.endAt - Date.now();
+      data.timer.totalSeconds = Math.max(0, Math.round(remainMs / 1000));
+      updateDisplay();
+      if (remainMs > 0) {
+        save();
+        return;
+      }
+    } else if (data.timer.totalSeconds > 0) {
       data.timer.totalSeconds--;
       updateDisplay();
       save();
-    } else {
-      clearInterval(timerId);
-      timerId = null;
-      data.timer.running = false;
-      save();
-      playChime();
-      if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
-      alert("🐟 时间到啦！可以继续，也可以先记录本轮～");
+      return;
     }
+    // 时间到
+    clearInterval(timerId);
+    timerId = null;
+    data.timer.running = false;
+    data.timer.endAt = null;
+    data.timer.totalSeconds = 0;
+    save();
+    ensureAudio();
+    playChime();
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+    alert("🐟 时间到啦！可以继续，也可以先记录本轮～");
   }
 
   startBtn.addEventListener("click", () => {
     if (data.timer.running) return;
     ensureAudio();
     data.timer.running = true;
+    data.timer.endAt = Date.now() + data.timer.totalSeconds * 1000;
     save();
     timerId = setInterval(tick, 1000);
+  });
+
+  document.addEventListener("pointerdown", ensureAudio);
+  document.getElementById("testSound").addEventListener("click", () => {
+    ensureAudio();
+    playChime();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && data.timer.running) tick();
+  });
+  window.addEventListener("focus", () => {
+    if (data.timer.running) tick();
   });
 
   pauseBtn.addEventListener("click", () => {
     clearInterval(timerId);
     timerId = null;
+    if (data.timer.running && data.timer.endAt) {
+      data.timer.totalSeconds = Math.max(0, Math.round((data.timer.endAt - Date.now()) / 1000));
+    }
     data.timer.running = false;
+    data.timer.endAt = null;
     save();
   });
 
   addBtn.addEventListener("click", () => {
     data.timer.addedSeconds += 20 * 60;
     data.timer.totalSeconds += 20 * 60;
+    if (data.timer.endAt) data.timer.endAt += 20 * 60 * 1000;
     updateDisplay();
     save();
   });
@@ -796,6 +923,7 @@
     clearInterval(timerId);
     timerId = null;
     data.timer.running = false;
+    data.timer.endAt = null;
     const val = Math.max(1, parseInt(timeInput.value) || 25);
     data.timer.baseSeconds = val * 60;
     data.timer.addedSeconds = 0;
@@ -806,6 +934,7 @@
 
   timeInput.addEventListener("change", () => {
     if (data.timer.running) return;
+    data.timer.endAt = null;
     const val = Math.max(1, parseInt(timeInput.value) || 25);
     data.timer.baseSeconds = val * 60;
     data.timer.addedSeconds = 0;
@@ -1110,9 +1239,72 @@
     exportArea.textContent = text;
   });
 
+  function buildPrintHTML() {
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth() + 1;
+    const cnM = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+    const weekNames = ["周日","周一","周二","周三","周四","周五","周六"];
+    const monthRecords = data.done.filter(x => {
+      const [yy, mm] = x.date.split("-").map(Number);
+      return yy === y && mm === m;
+    });
+
+    if (monthRecords.length === 0) {
+      return '<div class="p-empty">本月暂无记录</div>';
+    }
+
+    const dayMap = {};
+    monthRecords.forEach(r => {
+      if (!dayMap[r.date]) dayMap[r.date] = {};
+      if (!dayMap[r.date][r.taskName]) dayMap[r.date][r.taskName] = 0;
+      dayMap[r.date][r.taskName] += r.min;
+    });
+
+    let totalMin = 0;
+    let daysHTML = "";
+    Object.keys(dayMap).sort().forEach(date => {
+      const [yy, mm, dd] = date.split("-").map(Number);
+      const d = new Date(yy, mm - 1, dd);
+      const dayTotal = Object.values(dayMap[date]).reduce((a, b) => a + b, 0);
+      totalMin += dayTotal;
+      let tasksHTML = "";
+      Object.keys(dayMap[date]).forEach(taskName => {
+        const todo = data.todos.find(t => t.name === taskName);
+        const status = todo ? (todo.done ? "done" : "doing") : "none";
+        const statusChar = todo ? (todo.done ? "✔" : "◯") : "·";
+        const review = todo && todo.review ? escapeHtml(todo.review) : "";
+        tasksHTML += '<div class="p-task">'
+          + '<span class="p-status p-status-' + status + '">' + statusChar + '</span>'
+          + '<span class="p-name">' + escapeHtml(taskName) + '</span>'
+          + '<span class="p-min">' + dayMap[date][taskName] + '分钟</span>'
+          + (review ? '<div class="p-review">复盘：' + review + '</div>' : '')
+          + '</div>';
+      });
+      daysHTML += '<div class="p-day">'
+        + '<div class="p-day-head">'
+        + '<span class="p-day-num">' + dd + '号</span>'
+        + '<span class="p-day-week">' + weekNames[d.getDay()] + '</span>'
+        + '<span class="p-day-total">共 ' + dayTotal + ' 分钟</span>'
+        + '</div>'
+        + tasksHTML
+        + '</div>';
+    });
+
+    const days = Object.keys(dayMap).length;
+    return '<div class="p-page">'
+      + '<div class="p-title">🐟 ' + cnM[m - 1] + '专注汇总</div>'
+      + '<div class="p-sub">' + y + '年 · 共 ' + totalMin + ' 分钟 · ' + days + ' 天</div>'
+      + daysHTML
+      + '<div class="p-legend">'
+      + '<span><span class="p-status p-status-done">✔</span> 已完成</span>'
+      + '<span><span class="p-status p-status-doing">◯</span> 进行中</span>'
+      + '<span><span class="p-status p-status-none">·</span> 未登记</span>'
+      + '</div>'
+      + '</div>';
+  }
+
   printBtn.addEventListener("click", () => {
-    const text = buildMonthSummary();
-    printContainer.textContent = text;
+    printContainer.innerHTML = buildPrintHTML();
     window.print();
   });
 
@@ -1143,7 +1335,9 @@
   timeInput.value = Math.round(data.timer.baseSeconds / 60) || 25;
   updateDisplay();
   if (data.timer.running) {
+    if (!data.timer.endAt) data.timer.endAt = Date.now() + data.timer.totalSeconds * 1000;
     timerId = setInterval(tick, 1000);
+    tick();
   }
   noteBox.value = data.notes || "";
   renderTodos();
