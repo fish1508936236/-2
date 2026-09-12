@@ -499,6 +499,23 @@
     overflow-y: auto;
   }
 
+  /* Print */
+  #printContainer { display: none; }
+
+  @media print {
+    body { background: #fff !important; padding: 0 !important; }
+    #app { display: none !important; }
+    #dayModal { display: none !important; }
+    #printContainer {
+      display: block !important;
+      color: #000;
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+
   /* Fish decorations */
   .fish-deco {
     position: fixed;
@@ -618,12 +635,16 @@
 
       <div style="margin-top:14px;">
         <button class="btn btn-primary btn-small" id="exportBtn">导出当月汇总</button>
+        <button class="btn btn-secondary btn-small" id="printBtn" style="margin-left:8px;">🖨 打印汇总</button>
       </div>
 
       <div class="export-area" id="exportArea" style="display:none;"></div>
     </div>
   </section>
 </div>
+
+<!-- Print-only monthly summary -->
+<div id="printContainer"></div>
 
 <!-- Day Detail Modal -->
 <div class="modal-mask" id="dayModal">
@@ -700,6 +721,39 @@
     timeText.textContent = `${m}:${sec}`;
   }
 
+  // Sound notification
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  }
+
+  function playChime() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const notes = [
+      { f: 880, t: 0, d: 0.18 },
+      { f: 1174.66, t: 0.22, d: 0.18 },
+      { f: 1567.98, t: 0.44, d: 0.32 }
+    ];
+    notes.forEach(n => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = n.f;
+      gain.gain.setValueAtTime(0.0001, now + n.t);
+      gain.gain.exponentialRampToValueAtTime(0.5, now + n.t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + n.t);
+      osc.stop(now + n.t + n.d + 0.05);
+    });
+  }
+
   function tick() {
     if (data.timer.totalSeconds > 0) {
       data.timer.totalSeconds--;
@@ -710,12 +764,15 @@
       timerId = null;
       data.timer.running = false;
       save();
+      playChime();
+      if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
       alert("🐟 时间到啦！可以继续，也可以先记录本轮～");
     }
   }
 
   startBtn.addEventListener("click", () => {
     if (data.timer.running) return;
+    ensureAudio();
     data.timer.running = true;
     save();
     timerId = setInterval(tick, 1000);
@@ -1005,10 +1062,13 @@
     dayModal.classList.add("show");
   }
 
-  // Export
+  // Export & Print
   const exportBtn = document.getElementById("exportBtn");
   const exportArea = document.getElementById("exportArea");
-  exportBtn.addEventListener("click", () => {
+  const printBtn = document.getElementById("printBtn");
+  const printContainer = document.getElementById("printContainer");
+
+  function buildMonthSummary() {
     const y = calDate.getFullYear();
     const m = calDate.getMonth() + 1;
     const monthRecords = data.done.filter(x => {
@@ -1041,8 +1101,19 @@
       });
     }
 
+    return text;
+  }
+
+  exportBtn.addEventListener("click", () => {
+    const text = buildMonthSummary();
     exportArea.style.display = "block";
     exportArea.textContent = text;
+  });
+
+  printBtn.addEventListener("click", () => {
+    const text = buildMonthSummary();
+    printContainer.textContent = text;
+    window.print();
   });
 
   // Toast button
