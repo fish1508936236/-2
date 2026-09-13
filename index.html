@@ -1545,4 +1545,340 @@
       const i = Number(dropBtn.dataset.sdrop);
       const s = data.shelved[i];
       if (!s) return;
-      if (!confirm(`丢弃「${s.taskName} · ${s.subName}」这条待继续任务吗？已专注的 ${Math.max(1, Math.round(s.elapsedSec / 60))} 分钟不计
+      if (!confirm(`丢弃「${s.taskName} · ${s.subName}」这条待继续任务吗？已专注的 ${Math.max(1, Math.round(s.elapsedSec / 60))} 分钟不计入记录。`)) return;
+      data.shelved.splice(i, 1);
+      save();
+      renderShelved();
+    }
+  });
+
+  shelveBtn.addEventListener("click", () => {
+    if (data.activeTodoIndex === null) {
+      alert("🐟 请先选择一个任务");
+      return;
+    }
+    const todo = data.todos[data.activeTodoIndex];
+    data.shelved.push({
+      taskName: todo.name,
+      subName: subTaskInput.value.trim() || "（未填写内容）",
+      elapsedSec: realElapsedSec(),
+      type: todo.type || "big",
+      startClock: data.timer.sessionStartClock || Date.now(),
+      activeTodoIndex: data.activeTodoIndex
+    });
+    subTaskInput.value = "";
+    clearInterval(timerId);
+    timerId = null;
+    data.timer.running = false;
+    data.timer.endAt = null;
+    data.timer.elapsedSec = 0;
+    data.timer.sessionStartAt = null;
+    data.timer.sessionStartClock = null;
+    const val = Math.max(1, parseInt(timeInput.value) || 25);
+    data.timer.baseSeconds = val * 60;
+    data.timer.addedSeconds = 0;
+    data.timer.totalSeconds = val * 60;
+    updateDisplay();
+    data.activeTodoIndex = null;
+    save();
+    renderTodos();
+    renderShelved();
+    alert(`🐟 已搁置「${todo.name}」，先去做别的吧～`);
+  });
+
+  // Notes
+  const noteBox = document.getElementById("noteBox");
+  noteBox.addEventListener("input", () => {
+    data.notes = noteBox.value;
+    save();
+  });
+
+  // Calendar
+  const calMonth = document.getElementById("calMonth");
+  const calGrid = document.getElementById("calGrid");
+  const prevMonth = document.getElementById("prevMonth");
+  const nextMonth = document.getElementById("nextMonth");
+  let calDate = new Date();
+  calDate.setDate(1);
+
+  function renderCalendar() {
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth();
+    calMonth.textContent = `${y}年${m + 1}月`;
+    calGrid.innerHTML = "";
+
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement("div");
+      calGrid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const day = document.createElement("div");
+      day.className = "cal-day";
+      const dateStr = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const dayRecords = data.done.filter(x => x.date === dateStr);
+      const dayMin = dayRecords.reduce((sum, x) => sum + x.min, 0);
+
+      if (dayRecords.length > 0) day.classList.add("has-record");
+      const today = new Date();
+      if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
+        day.classList.add("today");
+      }
+
+      day.innerHTML = `
+        <div class="cal-day-num">${d}</div>
+        ${dayMin > 0 ? `<div class="cal-day-min">${dayMin}分钟</div>` : ""}
+      `;
+      day.addEventListener("click", () => showDay(dateStr, dayRecords));
+      calGrid.appendChild(day);
+    }
+  }
+
+  prevMonth.addEventListener("click", () => {
+    calDate.setMonth(calDate.getMonth() - 1);
+    renderCalendar();
+  });
+  nextMonth.addEventListener("click", () => {
+    calDate.setMonth(calDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  // Day modal
+  const dayModal = document.getElementById("dayModal");
+  const dayModalTitle = document.getElementById("dayModalTitle");
+  const dayModalContent = document.getElementById("dayModalContent");
+  document.getElementById("closeModal").addEventListener("click", () => {
+    dayModal.classList.remove("show");
+  });
+
+  function showDay(dateStr, records) {
+    dayModalTitle.textContent = dateStr;
+    dayModalContent.innerHTML = "";
+
+    if (records.length === 0) {
+      dayModalContent.innerHTML = `<div class="empty-tip">当天没有记录</div>`;
+    } else {
+      const total = records.reduce((a, r) => a + r.min, 0);
+      const head = document.createElement("div");
+      head.className = "day-task-name";
+      head.innerHTML = `
+        <span>共 ${records.length} 条</span>
+        <span style="color:var(--rose-500);font-size:14px;">合计 ${total} 分钟</span>
+      `;
+      dayModalContent.appendChild(head);
+
+      records.forEach(r => {
+        const idx = data.done.indexOf(r);
+        const todo = data.todos.find(t => t.name === r.taskName);
+        const type = r.type || "big";
+        const status = todo ? (todo.done ? "✔" : "◯") : "·";
+        const review = todo && todo.review ? todo.review : "暂无复盘";
+        const item = document.createElement("div");
+        item.className = "day-task-item";
+        item.innerHTML = `
+          <div class="day-task-name">
+            <span>
+              <span class="type-tag ${type === "small" ? "small" : ""}">${type === "small" ? "小" : "大"}</span>
+              <span class="done-name ${type === "small" ? "small" : ""}">${escapeHtml(r.taskName)} ${status} · ${escapeHtml(r.subName)}</span>
+            </span>
+            <span class="done-right">
+              <span class="rec-range">${formatRange(r.startTime, r.endTime)}</span>
+              <span style="color:var(--rose-500);font-size:13px;">${r.min}分钟</span>
+              <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
+            </span>
+          </div>
+          <div class="day-task-review">${escapeHtml(review)}</div>
+        `;
+        dayModalContent.appendChild(item);
+      });
+    }
+    dayModal.classList.add("show");
+  }
+
+  dayModalContent.addEventListener("click", e => {
+    const btn = e.target.closest(".done-del");
+    if (!btn) return;
+    const idx = Number(btn.dataset.idx);
+    if (idx < 0 || idx >= data.done.length) return;
+    const item = data.done[idx];
+    if (!confirm(`确定删除「${item.taskName} · ${item.subName}」这条记录吗？`)) return;
+    deleteDoneRecord(idx);
+    showDay(dayModalTitle.textContent, data.done.filter(x => x.date === dayModalTitle.textContent));
+  });
+
+  // Export & Print
+  const exportBtn = document.getElementById("exportBtn");
+  const exportArea = document.getElementById("exportArea");
+  const printBtn = document.getElementById("printBtn");
+  const printContainer = document.getElementById("printContainer");
+
+  function buildMonthSummary() {
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth() + 1;
+    const monthRecords = data.done.filter(x => {
+      const [yy, mm] = x.date.split("-").map(Number);
+      return yy === y && mm === m;
+    });
+
+    let text = `🐟 番茄 · ${y}年${m}月 汇总\n\n`;
+    if (monthRecords.length === 0) {
+      text += "本月暂无记录";
+    } else {
+      const dayMap = {};
+      monthRecords.forEach(r => {
+        if (!dayMap[r.date]) dayMap[r.date] = {};
+        if (!dayMap[r.date][r.taskName]) dayMap[r.date][r.taskName] = 0;
+        dayMap[r.date][r.taskName] += r.min;
+      });
+
+      Object.keys(dayMap).sort().forEach(date => {
+        text += `【${date}】\n`;
+        const dayTotal = Object.values(dayMap[date]).reduce((a, b) => a + b, 0);
+        text += `当日总耗时：${dayTotal}分钟\n`;
+        Object.keys(dayMap[date]).forEach(taskName => {
+          const todo = data.todos.find(t => t.name === taskName);
+          const status = todo ? (todo.done ? "✔" : "◯") : "·";
+          const review = todo && todo.review ? ` | ${todo.review}` : "";
+          text += `  - ${taskName} ${status} ${dayMap[date][taskName]}分钟${review}\n`;
+        });
+        text += "\n";
+      });
+    }
+
+    return text;
+  }
+
+  exportBtn.addEventListener("click", () => {
+    exportArea.style.display = "block";
+    exportArea.innerHTML = buildPrintHTML();
+  });
+
+  function buildPrintHTML() {
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth() + 1;
+    const cnM = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+    const weekNames = ["周日","周一","周二","周三","周四","周五","周六"];
+    const monthRecords = data.done.filter(x => {
+      const [yy, mm] = x.date.split("-").map(Number);
+      return yy === y && mm === m;
+    });
+
+    if (monthRecords.length === 0) {
+      return '<div class="p-empty">本月暂无记录</div>';
+    }
+
+    const dayGroups = {};
+    monthRecords.forEach(r => {
+      if (!dayGroups[r.date]) dayGroups[r.date] = [];
+      dayGroups[r.date].push(r);
+    });
+
+    let totalMin = 0;
+    let daysHTML = "";
+    Object.keys(dayGroups).sort().forEach(date => {
+      const [yy, mm, dd] = date.split("-").map(Number);
+      const d = new Date(yy, mm - 1, dd);
+      const dayRecords = dayGroups[date];
+      const dayTotal = dayRecords.reduce((a, r) => a + r.min, 0);
+      totalMin += dayTotal;
+      let tasksHTML = "";
+      dayRecords.forEach(r => {
+        const todo = data.todos.find(t => t.name === r.taskName);
+        const type = r.type || (todo && todo.type) || "big";
+        const status = todo ? (todo.done ? "done" : "doing") : "none";
+        const statusChar = todo ? (todo.done ? "✔" : "◯") : "·";
+        const review = todo && todo.review ? escapeHtml(todo.review) : "";
+        const range = formatRange(r.startTime, r.endTime);
+        tasksHTML += '<div class="p-task p-task-' + type + '">'
+          + '<span class="p-status p-status-' + status + '">' + statusChar + '</span>'
+          + '<span class="p-type-tag' + (type === "small" ? " p-type-tag-small" : "") + '">' + (type === "small" ? "小" : "大") + '</span>'
+          + '<span class="p-name">' + escapeHtml(r.taskName) + (r.subName ? ' · ' + escapeHtml(r.subName) : '') + '</span>'
+          + '<span class="p-min">' + (range ? range + ' · ' : '') + r.min + '分钟</span>'
+          + (review ? '<div class="p-review">复盘：' + review + '</div>' : '')
+          + '</div>';
+      });
+      daysHTML += '<div class="p-day">'
+        + '<div class="p-day-head">'
+        + '<span class="p-day-num">' + dd + '号</span>'
+        + '<span class="p-day-week">' + weekNames[d.getDay()] + '</span>'
+        + '<span class="p-day-total">共 ' + dayTotal + ' 分钟</span>'
+        + '</div>'
+        + tasksHTML
+        + '</div>';
+    });
+
+    const days = Object.keys(dayGroups).length;
+    return '<div class="p-page">'
+      + '<div class="p-title">🐟 ' + cnM[m - 1] + '专注汇总</div>'
+      + '<div class="p-sub">' + y + '年 · 共 ' + monthRecords.length + ' 条 · ' + totalMin + ' 分钟 · ' + days + ' 天</div>'
+      + daysHTML
+      + '<div class="p-legend">'
+      + '<span><span class="p-status p-status-done">✔</span> 已完成</span>'
+      + '<span><span class="p-status p-status-doing">◯</span> 进行中</span>'
+      + '<span><span class="p-status p-status-none">·</span> 未登记</span>'
+      + '<span><span class="p-type-tag">大</span> 大任务</span>'
+      + '<span><span class="p-type-tag p-type-tag-small">小</span> 小任务</span>'
+      + '</div>'
+      + '</div>';
+  }
+
+  printBtn.addEventListener("click", () => {
+    printContainer.innerHTML = buildPrintHTML();
+    window.print();
+  });
+
+  // Toast button
+  document.getElementById("toastBtn").addEventListener("click", () => {
+    alert("🐟 鱼鱼说：专注完记得休息一下～");
+  });
+
+  // Utils
+  function formatDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[c]));
+  }
+
+  function fmtHM(ms) {
+    if (!ms) return "";
+    const d = new Date(ms);
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+
+  function formatRange(s, e) {
+    const a = fmtHM(s);
+    const b = fmtHM(e);
+    return a && b ? a + "-" + b : "";
+  }
+
+  // Init
+  timeInput.value = Math.round(data.timer.baseSeconds / 60) || 25;
+  updateDisplay();
+  if (data.timer.running) {
+    if (!data.timer.endAt) data.timer.endAt = Date.now() + data.timer.totalSeconds * 1000;
+    timerId = setInterval(tick, 1000);
+    tick();
+  }
+  noteBox.value = data.notes || "";
+  renderTodos();
+  renderDone();
+  renderCalendar();
+  renderShelved();
+})();
+</script>
+</body>
+</html>
