@@ -623,21 +623,42 @@
   .type-pick { display: flex; gap: 6px; }
   .type-pick-btn { flex: 1; border: 1px solid var(--pink-200); background: var(--pink-50); color: var(--text-sub); border-radius: 10px; padding: 6px 0; font-size: 13px; cursor: pointer; }
   .type-pick-btn.active { background: var(--pink-300); color: #fff; border-color: var(--pink-300); font-weight: 700; }
-  .type-tag { display: inline-block; font-size: 10px; font-weight: 700; background: #FFD6E4; color: #E5547D; border-radius: 6px; padding: 1px 5px; margin-right: 6px; vertical-align: middle; }
-  .type-tag.small { background: #F3E7EE; color: #B79AA8; }
-  .task-name.small { font-weight: 400; color: #B79AA8; }
-  .done-name { font-size: 14px; }
-  .done-name.small { font-weight: 400; color: #B79AA8; }
-  .done-name:not(.small) { font-weight: 700; color: var(--rose-500); }
+  .type-tag { display: inline-block; font-size: 10px; font-weight: 800; background: #E5547D; color: #fff; border-radius: 6px; padding: 1px 6px; margin-right: 6px; vertical-align: middle; }
+  .type-tag.small { background: #EBDCE6; color: #8E7484; font-weight: 600; }
+  .task-name.small { font-size: 13px; font-weight: 400; color: #A78FA0; }
+  .done-name { font-size: 15px; }
+  .done-name.small { font-size: 12px; font-weight: 400; color: #A78FA0; }
+  .done-name:not(.small) { font-weight: 800; color: #D6456F; }
   .rec-range { font-size: 11px; color: var(--blue-gray); font-weight: 400; }
-  .p-type-tag { font-size: 10px; font-weight: 700; background: #FFD6E4; color: #E5547D; border-radius: 6px; padding: 1px 5px; margin-right: 6px; }
-  .p-type-tag-small { background: #F3E7EE; color: #B79AA8; }
-  .p-task-big .p-name { font-weight: 800; color: #D6456F; }
-  .p-task-small .p-name { font-weight: 400; color: #A78FA0; }
+  .p-type-tag { font-size: 10px; font-weight: 800; background: #E5547D; color: #fff; border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
+  .p-type-tag-small { background: #EBDCE6; color: #8E7484; font-weight: 600; }
+  .p-task-big .p-name { font-size: 15px; font-weight: 800; color: #D6456F; }
+  .p-task-small .p-name { font-size: 12px; font-weight: 400; color: #A78FA0; }
   .shelved-item { background: var(--pink-50); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
   .shelved-main { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-  .shelved-name { font-weight: 700; color: var(--rose-500); }
-  .shelved-name.small { font-weight: 400; color: #B79AA8; }
+  .shelved-name { font-weight: 800; color: #D6456F; }
+  .shelved-name.small { font-size: 12px; font-weight: 400; color: #A78FA0; }
+  .arch-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px 6px; margin-top: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-sub); border-top: 1px dashed var(--pink-200); user-select: none; }
+  .arch-arrow { color: var(--rose-400); font-size: 12px; }
+  .task-card.archived { opacity: .8; background: #FFF3F7; }
+  .task-card.archived .task-name { text-decoration: line-through; color: var(--text-sub); }
+  .task-restore { border: 1px solid var(--pink-200); background: var(--pink-50); color: var(--rose-500); border-radius: 8px; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+  .status-circle { transition: transform .2s ease, box-shadow .2s ease; }
+  .status-circle:active { transform: scale(.8); }
+  /* 拖拽 & 子任务 */
+  .drag-handle { touch-action: none; cursor: grab; color: var(--blue-gray); font-size: 15px; padding: 2px 6px; line-height: 1; }
+  .sub-list { margin: 2px 0 6px 26px; padding-left: 10px; border-left: 2px solid var(--pink-200); }
+  .sub-card { background: #FFF9FC; }
+  .sub-badge { font-size: 11px; color: var(--rose-400); padding: 2px 2px 4px; cursor: pointer; }
+  .drop-zone.drag-over { outline: 2px dashed var(--pink-300); outline-offset: 2px; }
+  .drag-ghost { position: fixed; z-index: 9999; background: #fff; border: 1px solid var(--pink-200); border-radius: 12px; padding: 10px 12px; box-shadow: 0 8px 20px rgba(229,84,125,.25); pointer-events: none; opacity: .95; font-size: 13px; }
+  body.dragging { user-select: none; }
+  .loose-divider { display: flex; align-items: center; gap: 8px; padding: 12px 2px 6px; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--text-sub); border-top: 1px dashed var(--pink-200); }
+  .done-day-head { display: flex; align-items: center; gap: 8px; padding: 8px 2px 6px; margin-top: 4px; cursor: pointer; border-bottom: 1px dashed var(--pink-200); user-select: none; }
+  .done-day-head:first-child { margin-top: 0; }
+  .done-day-label { font-size: 13px; font-weight: 700; color: var(--rose-500); }
+  .done-day-meta { font-size: 11px; color: var(--blue-gray); flex: 1; }
+  .done-day-arrow { font-size: 12px; color: var(--rose-400); }
   .shelved-sub { color: var(--text-sub); font-size: 12px; }
   .shelved-meta { font-size: 12px; color: var(--blue-gray); margin-top: 4px; }
   .shelved-actions { display: flex; gap: 8px; margin-top: 6px; }
@@ -699,6 +720,7 @@
     <div class="card timer-card">
       <div style="font-size:13px;color:var(--text-sub);">本轮专注</div>
       <div class="timer-display" id="timeText">25:00</div>
+      <div id="todayStat" style="font-size:12px;color:var(--blue-gray);margin:-6px 0 10px;">今天已专注 0 分钟</div>
 
       <div style="display:flex;justify-content:center;gap:8px;align-items:center;margin-bottom:14px;">
         <label style="font-size:13px;color:var(--text-sub);">时长</label>
@@ -754,7 +776,10 @@
   <!-- Record Panel -->
   <section class="panel" id="panel-record">
     <div class="card">
-      <div class="card-title">✅ 已完成</div>
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>✅ 已完成</span>
+        <button class="btn btn-ghost btn-small" id="doneToggleAll">展开全部</button>
+      </div>
       <div id="doneList"></div>
     </div>
 
@@ -839,7 +864,8 @@
       const parsed = JSON.parse(raw);
       return Object.assign(JSON.parse(JSON.stringify(defaultData)), parsed, {
         timer: Object.assign({}, defaultData.timer, parsed.timer || {}),
-        shelved: Array.isArray(parsed.shelved) ? parsed.shelved : []
+        shelved: Array.isArray(parsed.shelved) ? parsed.shelved : [],
+        todos: (parsed.todos || []).map((t, i) => Object.assign({ parent: null }, t, { id: t.id || (t.name || "任务") + "_" + i }))
       });
     } catch (e) {
       return JSON.parse(JSON.stringify(defaultData));
@@ -1029,29 +1055,226 @@
   const todoList = document.getElementById("todoList");
   const activeTaskBox = document.getElementById("activeTaskBox");
 
+  let expandedParents = {};
+  let drag = null;
+  let suppressClick = false;
+
+  function isLoose(t) {
+    if (!t.parent) return true;
+    const p = data.todos.find(x => x.id === t.parent);
+    return !p || !!p.done;
+  }
+
+  function taskTotalMin(todo) {
+    let s = todo.totalMin || 0;
+    data.todos.forEach(t => { if (t.parent === todo.id) s += (t.totalMin || 0); });
+    return s;
+  }
+
+  function buildTodoCard(todo, idx, isChild) {
+    const card = document.createElement("div");
+    card.className = "task-card";
+    if (idx === data.activeTodoIndex) card.classList.add("active");
+    if (isChild) card.classList.add("sub-card");
+    if (todo.type === "big") card.classList.add("drop-zone");
+    card.dataset.todoId = todo.id;
+
+    let subBadge = "";
+    if (todo.type === "big") {
+      const n = data.todos.filter(t => t.parent === todo.id && !t.done).length;
+      if (n) {
+        subBadge = `<div class="sub-badge" data-toggle-sub="${idx}">📎 ${n} 个子任务 ${expandedParents[todo.id] ? "▾" : "▸"}</div>`;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="task-top">
+        <div class="status-circle ${todo.done ? "done" : ""}" data-idx="${idx}"></div>
+        <span class="type-tag ${todo.type === "small" ? "small" : ""}">${todo.type === "small" ? "小" : "大"}</span>
+        <div class="task-name ${todo.type === "small" ? "small" : ""}">${escapeHtml(todo.name)}</div>
+        <div class="task-minutes">${taskTotalMin(todo)} 分钟</div>
+        <button class="task-delete" data-del="${idx}">×</button>
+        ${todo.type === "small" ? '<span class="drag-handle" title="拖到大任务下面">⠿</span>' : ""}
+      </div>
+      ${subBadge}
+      <div class="review-text" contenteditable="true" data-review="${idx}">${escapeHtml(todo.review || "")}</div>
+    `;
+
+    card.addEventListener("click", (e) => {
+      if (e.target.classList.contains("status-circle")) {
+        e.stopPropagation();
+        todo.done = !todo.done;
+        if (todo.done && data.activeTodoIndex === idx) data.activeTodoIndex = null;
+        if (todo.done && todo.type === "big") {
+          data.todos.forEach(t => { if (t.parent === todo.id) t.parent = null; });
+        }
+        save();
+        renderTodos();
+        return;
+      }
+      if (e.target.classList.contains("task-delete")) {
+        e.stopPropagation();
+        data.todos.splice(idx, 1);
+        if (data.activeTodoIndex === idx) data.activeTodoIndex = null;
+        save();
+        renderTodos();
+        return;
+      }
+      if (e.target.classList.contains("sub-badge")) {
+        e.stopPropagation();
+        expandedParents[todo.id] = !expandedParents[todo.id];
+        renderTodos();
+        return;
+      }
+      if (e.target.classList.contains("review-text")) return;
+      if (e.target.classList.contains("drag-handle")) return;
+      data.activeTodoIndex = idx;
+      save();
+      renderTodos();
+    });
+
+    const reviewEl = card.querySelector(".review-text");
+    reviewEl.addEventListener("blur", () => {
+      todo.review = reviewEl.innerText.trim();
+      save();
+    });
+    reviewEl.addEventListener("click", (e) => e.stopPropagation());
+
+    const handle = card.querySelector(".drag-handle");
+    if (handle) {
+      handle.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        beginDrag(todo, e);
+      });
+    }
+
+    return card;
+  }
+
+  function beginDrag(todo, e) {
+    const card = e.currentTarget.closest(".task-card");
+    const rect = card.getBoundingClientRect();
+    drag = { todo, rect, ghost: null, startX: e.clientX, startY: e.clientY, dx: e.clientX - rect.left, dy: e.clientY - rect.top, moved: false };
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+
+  document.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    if (!drag.ghost) {
+      if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) < 6) return;
+      const ghost = document.createElement("div");
+      ghost.className = "drag-ghost";
+      ghost.innerHTML = `<span class="type-tag small">小</span><span>${escapeHtml(drag.todo.name)}</span>`;
+      ghost.style.left = drag.rect.left + "px";
+      ghost.style.top = drag.rect.top + "px";
+      ghost.style.width = drag.rect.width + "px";
+      document.body.appendChild(ghost);
+      drag.ghost = ghost;
+      document.body.classList.add("dragging");
+    }
+    drag.moved = true;
+    drag.ghost.style.left = (e.clientX - drag.dx) + "px";
+    drag.ghost.style.top = (e.clientY - drag.dy) + "px";
+    document.querySelectorAll(".task-card.drop-zone").forEach(c => c.classList.remove("drag-over"));
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const zone = el ? el.closest(".task-card.drop-zone") : null;
+    if (zone && zone.dataset.todoId !== drag.todo.id) zone.classList.add("drag-over");
+  });
+
+  document.addEventListener("pointerup", (e) => {
+    if (!drag) return;
+    const todo = drag.todo;
+    const didMove = drag.moved;
+    if (drag.ghost) {
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const zone = el ? el.closest(".task-card.drop-zone") : null;
+      if (zone && zone.dataset.todoId && zone.dataset.todoId !== todo.id) {
+        todo.parent = zone.dataset.todoId;
+        expandedParents[zone.dataset.todoId] = true;
+      } else if (todo.parent) {
+        todo.parent = null; // 拖出大任务 = 移回未归类
+      }
+      drag.ghost.remove();
+    }
+    suppressClick = didMove;
+    drag = null;
+    document.body.classList.remove("dragging");
+    document.querySelectorAll(".task-card.drop-zone").forEach(c => c.classList.remove("drag-over"));
+    if (didMove) {
+      save();
+      renderTodos();
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (suppressClick) {
+      suppressClick = false;
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }, true);
+
   function renderTodos() {
     todoList.innerHTML = "";
-    data.todos.forEach((todo, idx) => {
-      const card = document.createElement("div");
-      card.className = "task-card";
-      if (idx === data.activeTodoIndex) card.classList.add("active");
-      if (todo.done) card.classList.add("done");
 
+    // 大任务（含子任务）
+    data.todos.forEach((todo, idx) => {
+      if (todo.done) return; // 已归档的单独渲染
+      if (todo.type !== "big") return;
+      todoList.appendChild(buildTodoCard(todo, idx, false));
+      const kids = data.todos.filter(t => t.parent === todo.id && !t.done);
+      if (kids.length && expandedParents[todo.id]) {
+        const subWrap = document.createElement("div");
+        subWrap.className = "sub-list";
+        kids.forEach(k => subWrap.appendChild(buildTodoCard(k, data.todos.indexOf(k), true)));
+        todoList.appendChild(subWrap);
+      }
+    });
+
+    // 未归类小任务（含被删除/归档大任务的孤儿）
+    const loose = data.todos.filter(t => t.type === "small" && !t.done && isLoose(t));
+    if (loose.length) {
+      const div = document.createElement("div");
+      div.className = "loose-divider";
+      div.textContent = "🔹 未归类小任务";
+      todoList.appendChild(div);
+      loose.forEach(t => todoList.appendChild(buildTodoCard(t, data.todos.indexOf(t), false)));
+    }
+
+    renderArchived();
+    renderActiveTask();
+  }
+
+  let archivedOpen = false;
+
+  function renderArchived() {
+    const archived = data.todos.filter(t => t.done);
+    if (!archived.length) return;
+    const head = document.createElement("div");
+    head.className = "arch-head";
+    head.innerHTML = `<span>🗂 已归档（${archived.length}）</span><span class="arch-arrow">${archivedOpen ? "▾" : "▸"}</span>`;
+    head.addEventListener("click", () => { archivedOpen = !archivedOpen; renderTodos(); });
+    todoList.appendChild(head);
+    if (!archivedOpen) return;
+    archived.forEach(todo => {
+      const idx = data.todos.indexOf(todo);
+      const card = document.createElement("div");
+      card.className = "task-card archived";
       card.innerHTML = `
         <div class="task-top">
-          <div class="status-circle ${todo.done ? "done" : ""}" data-idx="${idx}"></div>
+          <span class="status-circle done"></span>
           <span class="type-tag ${todo.type === "small" ? "small" : ""}">${todo.type === "small" ? "小" : "大"}</span>
-          <div class="task-name ${todo.type === "small" ? "small" : ""}">${escapeHtml(todo.name)}</div>
-          <div class="task-minutes">${todo.totalMin} 分钟</div>
+          <div class="task-name">${escapeHtml(todo.name)}</div>
+          <div class="task-minutes">${taskTotalMin(todo)} 分钟</div>
+          <button class="task-restore" data-restore="${idx}">↩ 恢复</button>
           <button class="task-delete" data-del="${idx}">×</button>
         </div>
-        <div class="review-text" contenteditable="true" data-review="${idx}">${escapeHtml(todo.review || "")}</div>
       `;
-
       card.addEventListener("click", (e) => {
-        if (e.target.classList.contains("status-circle")) {
+        if (e.target.classList.contains("task-restore")) {
           e.stopPropagation();
-          todo.done = !todo.done;
+          todo.done = false;
           save();
           renderTodos();
           return;
@@ -1059,42 +1282,28 @@
         if (e.target.classList.contains("task-delete")) {
           e.stopPropagation();
           data.todos.splice(idx, 1);
-          if (data.activeTodoIndex === idx) data.activeTodoIndex = null;
           save();
           renderTodos();
           return;
         }
-        if (e.target.classList.contains("review-text")) return;
-        data.activeTodoIndex = idx;
-        save();
-        renderTodos();
       });
-
-      const reviewEl = card.querySelector(".review-text");
-      reviewEl.addEventListener("blur", () => {
-        todo.review = reviewEl.innerText.trim();
-        save();
-      });
-      reviewEl.addEventListener("click", (e) => e.stopPropagation());
-
       todoList.appendChild(card);
     });
-
-    renderActiveTask();
   }
 
   function renderActiveTask() {
-    if (data.activeTodoIndex === null || !data.todos[data.activeTodoIndex]) {
+    const activeTodo = data.activeTodoIndex === null ? null : data.todos[data.activeTodoIndex];
+    if (!activeTodo || activeTodo.done) {
       activeTaskBox.innerHTML = `<div style="font-size:13px;color:var(--text-sub);text-align:center;padding:10px 0;">请先选择一个大任务</div>`;
       return;
     }
-    const todo = data.todos[data.activeTodoIndex];
+    const todo = activeTodo;
     activeTaskBox.innerHTML = `
       <div class="task-card active">
         <div class="task-top">
           <span class="type-tag ${todo.type === "small" ? "small" : ""}">${todo.type === "small" ? "小" : "大"}</span>
           <div class="task-name">${escapeHtml(todo.name)}</div>
-          <div class="task-minutes">${todo.totalMin} 分钟</div>
+          <div class="task-minutes">${taskTotalMin(todo)} 分钟</div>
         </div>
       </div>
     `;
@@ -1117,7 +1326,9 @@
       totalMin: 0,
       done: false,
       review: "",
-      type: newTodoType
+      type: newTodoType,
+      id: "t" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+      parent: null
     });
     data.activeTodoIndex = data.todos.length - 1;
     todoInput.value = "";
@@ -1130,31 +1341,91 @@
   const addSubDoneBtn = document.getElementById("addSubDone");
   const doneList = document.getElementById("doneList");
 
+  let doneCollapsed = {};
+  let doneAllExpanded = false;
+  const doneToggleAll = document.getElementById("doneToggleAll");
+
+  function doneDateLabel(date) {
+    const today = formatDate(new Date());
+    const yest = formatDate(new Date(Date.now() - 86400000));
+    if (date === today) return "今天";
+    if (date === yest) return "昨天";
+    const [yy, mm, dd] = date.split("-").map(Number);
+    const nowY = new Date().getFullYear();
+    return (yy === nowY ? "" : yy + "年") + mm + "月" + dd + "日";
+  }
+
+  function doneCollapsedFor(date) {
+    if (doneAllExpanded) return false;
+    if (doneCollapsed[date] !== undefined) return doneCollapsed[date];
+    return date !== formatDate(new Date());
+  }
+
+  function updateTodayStat() {
+    const el = document.getElementById("todayStat");
+    if (!el) return;
+    const today = formatDate(new Date());
+    const total = data.done.filter(r => r.date === today).reduce((a, r) => a + (r.min || 0), 0);
+    el.textContent = "今天已专注 " + total + " 分钟";
+  }
+
   function renderDone() {
     doneList.innerHTML = "";
     if (data.done.length === 0) {
       doneList.innerHTML = `<div class="empty-tip">还没有完成记录</div>`;
       return;
     }
-    [...data.done].reverse().forEach((item, i) => {
-      const idx = data.done.length - 1 - i;
-      const type = item.type || "big";
-      const div = document.createElement("div");
-      div.className = "done-item";
-      div.innerHTML = `
-        <span>
-          <span class="type-tag ${type === "small" ? "small" : ""}">${type === "small" ? "小" : "大"}</span>
-          <span class="done-name ${type === "small" ? "small" : ""}">${escapeHtml(item.taskName)} · ${escapeHtml(item.subName)}</span>
-        </span>
-        <span class="done-right">
-          <span class="rec-range">${formatRange(item.startTime, item.endTime)}</span>
-          <span class="done-min">${item.min} 分钟</span>
-          <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
-        </span>
-      `;
-      doneList.appendChild(div);
+    const groups = {};
+    data.done.forEach(item => {
+      if (!groups[item.date]) groups[item.date] = [];
+      groups[item.date].push(item);
     });
+    Object.keys(groups).sort().reverse().forEach(date => {
+      const records = groups[date];
+      const dayTotal = records.reduce((a, r) => a + r.min, 0);
+      const collapsed = doneCollapsedFor(date);
+      const head = document.createElement("div");
+      head.className = "done-day-head";
+      head.innerHTML = `
+        <span class="done-day-label">${doneDateLabel(date)}</span>
+        <span class="done-day-meta">${records.length}条 · ${dayTotal}分钟</span>
+        <span class="done-day-arrow">${collapsed ? "▸" : "▾"}</span>
+      `;
+      head.addEventListener("click", () => {
+        doneCollapsed[date] = !doneCollapsedFor(date);
+        doneAllExpanded = false;
+        doneToggleAll.textContent = "展开全部";
+        renderDone();
+      });
+      doneList.appendChild(head);
+      if (collapsed) return;
+      [...records].reverse().forEach(item => {
+        const idx = data.done.indexOf(item);
+        const type = item.type || "big";
+        const div = document.createElement("div");
+        div.className = "done-item";
+        div.innerHTML = `
+          <span>
+            <span class="type-tag ${type === "small" ? "small" : ""}">${type === "small" ? "小" : "大"}</span>
+            <span class="done-name ${type === "small" ? "small" : ""}">${escapeHtml(item.taskName)} · ${escapeHtml(item.subName)}</span>
+          </span>
+          <span class="done-right">
+            <span class="rec-range">${formatRange(item.startTime, item.endTime)}</span>
+            <span class="done-min">${item.min} 分钟</span>
+            <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
+          </span>
+        `;
+        doneList.appendChild(div);
+      });
+    });
+    updateTodayStat();
   }
+
+  doneToggleAll.addEventListener("click", () => {
+    doneAllExpanded = !doneAllExpanded;
+    doneToggleAll.textContent = doneAllExpanded ? "收起全部" : "展开全部";
+    renderDone();
+  });
 
   function deleteDoneRecord(idx) {
     const item = data.done[idx];
@@ -1248,13 +1519,16 @@
       const i = Number(resumeBtn.dataset.sresume);
       const s = data.shelved[i];
       if (!s) return;
-      if (!data.todos[s.activeTodoIndex]) {
+      const todo = data.todos[s.activeTodoIndex];
+      if (!todo) {
         alert("🐟 这个任务已经被删掉了，先重新添加吧");
         data.shelved.splice(i, 1);
         save();
         renderShelved();
         return;
       }
+      let restored = false;
+      if (todo.done) { todo.done = false; restored = true; }
       data.activeTodoIndex = s.activeTodoIndex;
       data.timer.elapsedSec = s.elapsedSec || 0;
       data.timer.sessionStartAt = null;
@@ -1264,347 +1538,11 @@
       save();
       renderTodos();
       renderShelved();
-      alert(`🐟 已继续「${s.taskName}」，计时已合并，继续加油～`);
+      alert(`🐟 已继续「${s.taskName}」${restored ? "（已恢复为未完成）" : ""}，计时已合并，继续加油～`);
       return;
     }
     if (dropBtn) {
       const i = Number(dropBtn.dataset.sdrop);
       const s = data.shelved[i];
       if (!s) return;
-      if (!confirm(`丢弃「${s.taskName} · ${s.subName}」这条待继续任务吗？已专注的 ${Math.max(1, Math.round(s.elapsedSec / 60))} 分钟不计入记录。`)) return;
-      data.shelved.splice(i, 1);
-      save();
-      renderShelved();
-    }
-  });
-
-  shelveBtn.addEventListener("click", () => {
-    if (data.activeTodoIndex === null) {
-      alert("🐟 请先选择一个任务");
-      return;
-    }
-    const todo = data.todos[data.activeTodoIndex];
-    data.shelved.push({
-      taskName: todo.name,
-      subName: subTaskInput.value.trim() || "（未填写内容）",
-      elapsedSec: realElapsedSec(),
-      type: todo.type || "big",
-      startClock: data.timer.sessionStartClock || Date.now(),
-      activeTodoIndex: data.activeTodoIndex
-    });
-    subTaskInput.value = "";
-    clearInterval(timerId);
-    timerId = null;
-    data.timer.running = false;
-    data.timer.endAt = null;
-    data.timer.elapsedSec = 0;
-    data.timer.sessionStartAt = null;
-    data.timer.sessionStartClock = null;
-    const val = Math.max(1, parseInt(timeInput.value) || 25);
-    data.timer.baseSeconds = val * 60;
-    data.timer.addedSeconds = 0;
-    data.timer.totalSeconds = val * 60;
-    updateDisplay();
-    data.activeTodoIndex = null;
-    save();
-    renderTodos();
-    renderShelved();
-    alert(`🐟 已搁置「${todo.name}」，先去做别的吧～`);
-  });
-
-  // Notes
-  const noteBox = document.getElementById("noteBox");
-  noteBox.addEventListener("input", () => {
-    data.notes = noteBox.value;
-    save();
-  });
-
-  // Calendar
-  const calMonth = document.getElementById("calMonth");
-  const calGrid = document.getElementById("calGrid");
-  const prevMonth = document.getElementById("prevMonth");
-  const nextMonth = document.getElementById("nextMonth");
-  let calDate = new Date();
-  calDate.setDate(1);
-
-  function renderCalendar() {
-    const y = calDate.getFullYear();
-    const m = calDate.getMonth();
-    calMonth.textContent = `${y}年${m + 1}月`;
-    calGrid.innerHTML = "";
-
-    const firstDay = new Date(y, m, 1).getDay();
-    const daysInMonth = new Date(y, m + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
-      const empty = document.createElement("div");
-      calGrid.appendChild(empty);
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const day = document.createElement("div");
-      day.className = "cal-day";
-      const dateStr = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      const dayRecords = data.done.filter(x => x.date === dateStr);
-      const dayMin = dayRecords.reduce((sum, x) => sum + x.min, 0);
-
-      if (dayRecords.length > 0) day.classList.add("has-record");
-      const today = new Date();
-      if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
-        day.classList.add("today");
-      }
-
-      day.innerHTML = `
-        <div class="cal-day-num">${d}</div>
-        ${dayMin > 0 ? `<div class="cal-day-min">${dayMin}分钟</div>` : ""}
-      `;
-      day.addEventListener("click", () => showDay(dateStr, dayRecords));
-      calGrid.appendChild(day);
-    }
-  }
-
-  prevMonth.addEventListener("click", () => {
-    calDate.setMonth(calDate.getMonth() - 1);
-    renderCalendar();
-  });
-  nextMonth.addEventListener("click", () => {
-    calDate.setMonth(calDate.getMonth() + 1);
-    renderCalendar();
-  });
-
-  // Day modal
-  const dayModal = document.getElementById("dayModal");
-  const dayModalTitle = document.getElementById("dayModalTitle");
-  const dayModalContent = document.getElementById("dayModalContent");
-  document.getElementById("closeModal").addEventListener("click", () => {
-    dayModal.classList.remove("show");
-  });
-
-  function showDay(dateStr, records) {
-    dayModalTitle.textContent = dateStr;
-    dayModalContent.innerHTML = "";
-
-    if (records.length === 0) {
-      dayModalContent.innerHTML = `<div class="empty-tip">当天没有记录</div>`;
-    } else {
-      const total = records.reduce((a, r) => a + r.min, 0);
-      const head = document.createElement("div");
-      head.className = "day-task-name";
-      head.innerHTML = `
-        <span>共 ${records.length} 条</span>
-        <span style="color:var(--rose-500);font-size:14px;">合计 ${total} 分钟</span>
-      `;
-      dayModalContent.appendChild(head);
-
-      records.forEach(r => {
-        const idx = data.done.indexOf(r);
-        const todo = data.todos.find(t => t.name === r.taskName);
-        const type = r.type || "big";
-        const status = todo ? (todo.done ? "✔" : "◯") : "·";
-        const review = todo && todo.review ? todo.review : "暂无复盘";
-        const item = document.createElement("div");
-        item.className = "day-task-item";
-        item.innerHTML = `
-          <div class="day-task-name">
-            <span>
-              <span class="type-tag ${type === "small" ? "small" : ""}">${type === "small" ? "小" : "大"}</span>
-              <span class="done-name ${type === "small" ? "small" : ""}">${escapeHtml(r.taskName)} ${status} · ${escapeHtml(r.subName)}</span>
-            </span>
-            <span class="done-right">
-              <span class="rec-range">${formatRange(r.startTime, r.endTime)}</span>
-              <span style="color:var(--rose-500);font-size:13px;">${r.min}分钟</span>
-              <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
-            </span>
-          </div>
-          <div class="day-task-review">${escapeHtml(review)}</div>
-        `;
-        dayModalContent.appendChild(item);
-      });
-    }
-    dayModal.classList.add("show");
-  }
-
-  dayModalContent.addEventListener("click", e => {
-    const btn = e.target.closest(".done-del");
-    if (!btn) return;
-    const idx = Number(btn.dataset.idx);
-    if (idx < 0 || idx >= data.done.length) return;
-    const item = data.done[idx];
-    if (!confirm(`确定删除「${item.taskName} · ${item.subName}」这条记录吗？`)) return;
-    deleteDoneRecord(idx);
-    showDay(dayModalTitle.textContent, data.done.filter(x => x.date === dayModalTitle.textContent));
-  });
-
-  // Export & Print
-  const exportBtn = document.getElementById("exportBtn");
-  const exportArea = document.getElementById("exportArea");
-  const printBtn = document.getElementById("printBtn");
-  const printContainer = document.getElementById("printContainer");
-
-  function buildMonthSummary() {
-    const y = calDate.getFullYear();
-    const m = calDate.getMonth() + 1;
-    const monthRecords = data.done.filter(x => {
-      const [yy, mm] = x.date.split("-").map(Number);
-      return yy === y && mm === m;
-    });
-
-    let text = `🐟 番茄 · ${y}年${m}月 汇总\n\n`;
-    if (monthRecords.length === 0) {
-      text += "本月暂无记录";
-    } else {
-      const dayMap = {};
-      monthRecords.forEach(r => {
-        if (!dayMap[r.date]) dayMap[r.date] = {};
-        if (!dayMap[r.date][r.taskName]) dayMap[r.date][r.taskName] = 0;
-        dayMap[r.date][r.taskName] += r.min;
-      });
-
-      Object.keys(dayMap).sort().forEach(date => {
-        text += `【${date}】\n`;
-        const dayTotal = Object.values(dayMap[date]).reduce((a, b) => a + b, 0);
-        text += `当日总耗时：${dayTotal}分钟\n`;
-        Object.keys(dayMap[date]).forEach(taskName => {
-          const todo = data.todos.find(t => t.name === taskName);
-          const status = todo ? (todo.done ? "✔" : "◯") : "·";
-          const review = todo && todo.review ? ` | ${todo.review}` : "";
-          text += `  - ${taskName} ${status} ${dayMap[date][taskName]}分钟${review}\n`;
-        });
-        text += "\n";
-      });
-    }
-
-    return text;
-  }
-
-  exportBtn.addEventListener("click", () => {
-    exportArea.style.display = "block";
-    exportArea.innerHTML = buildPrintHTML();
-  });
-
-  function buildPrintHTML() {
-    const y = calDate.getFullYear();
-    const m = calDate.getMonth() + 1;
-    const cnM = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
-    const weekNames = ["周日","周一","周二","周三","周四","周五","周六"];
-    const monthRecords = data.done.filter(x => {
-      const [yy, mm] = x.date.split("-").map(Number);
-      return yy === y && mm === m;
-    });
-
-    if (monthRecords.length === 0) {
-      return '<div class="p-empty">本月暂无记录</div>';
-    }
-
-    const dayGroups = {};
-    monthRecords.forEach(r => {
-      if (!dayGroups[r.date]) dayGroups[r.date] = [];
-      dayGroups[r.date].push(r);
-    });
-
-    let totalMin = 0;
-    let daysHTML = "";
-    Object.keys(dayGroups).sort().forEach(date => {
-      const [yy, mm, dd] = date.split("-").map(Number);
-      const d = new Date(yy, mm - 1, dd);
-      const dayRecords = dayGroups[date];
-      const dayTotal = dayRecords.reduce((a, r) => a + r.min, 0);
-      totalMin += dayTotal;
-      let tasksHTML = "";
-      dayRecords.forEach(r => {
-        const todo = data.todos.find(t => t.name === r.taskName);
-        const type = r.type || (todo && todo.type) || "big";
-        const status = todo ? (todo.done ? "done" : "doing") : "none";
-        const statusChar = todo ? (todo.done ? "✔" : "◯") : "·";
-        const review = todo && todo.review ? escapeHtml(todo.review) : "";
-        const range = formatRange(r.startTime, r.endTime);
-        tasksHTML += '<div class="p-task p-task-' + type + '">'
-          + '<span class="p-status p-status-' + status + '">' + statusChar + '</span>'
-          + '<span class="p-type-tag' + (type === "small" ? " p-type-tag-small" : "") + '">' + (type === "small" ? "小" : "大") + '</span>'
-          + '<span class="p-name">' + escapeHtml(r.taskName) + (r.subName ? ' · ' + escapeHtml(r.subName) : '') + '</span>'
-          + '<span class="p-min">' + (range ? range + ' · ' : '') + r.min + '分钟</span>'
-          + (review ? '<div class="p-review">复盘：' + review + '</div>' : '')
-          + '</div>';
-      });
-      daysHTML += '<div class="p-day">'
-        + '<div class="p-day-head">'
-        + '<span class="p-day-num">' + dd + '号</span>'
-        + '<span class="p-day-week">' + weekNames[d.getDay()] + '</span>'
-        + '<span class="p-day-total">共 ' + dayTotal + ' 分钟</span>'
-        + '</div>'
-        + tasksHTML
-        + '</div>';
-    });
-
-    const days = Object.keys(dayGroups).length;
-    return '<div class="p-page">'
-      + '<div class="p-title">🐟 ' + cnM[m - 1] + '专注汇总</div>'
-      + '<div class="p-sub">' + y + '年 · 共 ' + monthRecords.length + ' 条 · ' + totalMin + ' 分钟 · ' + days + ' 天</div>'
-      + daysHTML
-      + '<div class="p-legend">'
-      + '<span><span class="p-status p-status-done">✔</span> 已完成</span>'
-      + '<span><span class="p-status p-status-doing">◯</span> 进行中</span>'
-      + '<span><span class="p-status p-status-none">·</span> 未登记</span>'
-      + '<span><span class="p-type-tag">大</span> 大任务</span>'
-      + '<span><span class="p-type-tag p-type-tag-small">小</span> 小任务</span>'
-      + '</div>'
-      + '</div>';
-  }
-
-  printBtn.addEventListener("click", () => {
-    printContainer.innerHTML = buildPrintHTML();
-    window.print();
-  });
-
-  // Toast button
-  document.getElementById("toastBtn").addEventListener("click", () => {
-    alert("🐟 鱼鱼说：专注完记得休息一下～");
-  });
-
-  // Utils
-  function formatDate(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
-
-  function escapeHtml(str) {
-    return String(str || "").replace(/[&<>"']/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[c]));
-  }
-
-  function fmtHM(ms) {
-    if (!ms) return "";
-    const d = new Date(ms);
-    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-  }
-
-  function formatRange(s, e) {
-    const a = fmtHM(s);
-    const b = fmtHM(e);
-    return a && b ? a + "-" + b : "";
-  }
-
-  // Init
-  timeInput.value = Math.round(data.timer.baseSeconds / 60) || 25;
-  updateDisplay();
-  if (data.timer.running) {
-    if (!data.timer.endAt) data.timer.endAt = Date.now() + data.timer.totalSeconds * 1000;
-    timerId = setInterval(tick, 1000);
-    tick();
-  }
-  noteBox.value = data.notes || "";
-  renderTodos();
-  renderDone();
-  renderCalendar();
-  renderShelved();
-})();
-</script>
-</body>
-</html>
+      if (!confirm(`丢弃「${s.taskName} · ${s.subName}」这条待继续任务吗？已专注的 ${Math.max(1, Math.round(s.elapsedSec / 60))} 分钟不计
