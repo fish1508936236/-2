@@ -619,6 +619,29 @@
     text-align: center;
   }
 
+  /* 任务类型 & 搁置 & 时间段 */
+  .type-pick { display: flex; gap: 6px; }
+  .type-pick-btn { flex: 1; border: 1px solid var(--pink-200); background: var(--pink-50); color: var(--text-sub); border-radius: 10px; padding: 6px 0; font-size: 13px; cursor: pointer; }
+  .type-pick-btn.active { background: var(--pink-300); color: #fff; border-color: var(--pink-300); font-weight: 700; }
+  .type-tag { display: inline-block; font-size: 10px; font-weight: 700; background: #FFD6E4; color: #E5547D; border-radius: 6px; padding: 1px 5px; margin-right: 6px; vertical-align: middle; }
+  .type-tag.small { background: #F3E7EE; color: #B79AA8; }
+  .task-name.small { font-weight: 400; color: #B79AA8; }
+  .done-name { font-size: 14px; }
+  .done-name.small { font-weight: 400; color: #B79AA8; }
+  .done-name:not(.small) { font-weight: 700; color: var(--rose-500); }
+  .rec-range { font-size: 11px; color: var(--blue-gray); font-weight: 400; }
+  .p-type-tag { font-size: 10px; font-weight: 700; background: #FFD6E4; color: #E5547D; border-radius: 6px; padding: 1px 5px; margin-right: 6px; }
+  .p-type-tag-small { background: #F3E7EE; color: #B79AA8; }
+  .p-task-big .p-name { font-weight: 800; color: #D6456F; }
+  .p-task-small .p-name { font-weight: 400; color: #A78FA0; }
+  .shelved-item { background: var(--pink-50); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+  .shelved-main { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  .shelved-name { font-weight: 700; color: var(--rose-500); }
+  .shelved-name.small { font-weight: 400; color: #B79AA8; }
+  .shelved-sub { color: var(--text-sub); font-size: 12px; }
+  .shelved-meta { font-size: 12px; color: var(--blue-gray); margin-top: 4px; }
+  .shelved-actions { display: flex; gap: 8px; margin-top: 6px; }
+
   /* Print */
   #printContainer { display: none; }
 
@@ -704,14 +727,24 @@
         <textarea class="textarea subtask-input" id="subTaskInput" placeholder="本轮做了什么？"></textarea>
         <div class="row">
           <button class="btn btn-primary" id="addSubDone" style="flex:1;">提前完成本轮</button>
+          <button class="btn btn-secondary" id="shelveBtn">⏸ 搁置</button>
         </div>
       </div>
     </div>
 
+    <div class="card" id="shelveCard" style="display:none;">
+      <div class="card-title">⏸ 待继续任务</div>
+      <div id="shelvedList"></div>
+    </div>
+
     <div class="card">
       <div class="card-title">📝 大任务列表</div>
+      <div class="type-pick" style="margin-bottom:8px;">
+        <button class="type-pick-btn active" data-tp="big">🟥 大任务</button>
+        <button class="type-pick-btn" data-tp="small">🔹 小任务</button>
+      </div>
       <div class="task-input-row">
-        <input class="input" id="todoInput" placeholder="添加大任务" />
+        <input class="input" id="todoInput" placeholder="添加任务" />
         <button class="btn btn-secondary btn-small" id="addTodoBtn">添加</button>
       </div>
       <div class="task-list" id="todoList"></div>
@@ -789,8 +822,12 @@
       baseSeconds: 25 * 60,
       addedSeconds: 0,
       running: false,
-      endAt: null
-    }
+      endAt: null,
+      elapsedSec: 0,
+      sessionStartAt: null,
+      sessionStartClock: null
+    },
+    shelved: []
   };
 
   let data = load();
@@ -801,7 +838,8 @@
       if (!raw) return JSON.parse(JSON.stringify(defaultData));
       const parsed = JSON.parse(raw);
       return Object.assign(JSON.parse(JSON.stringify(defaultData)), parsed, {
-        timer: Object.assign({}, defaultData.timer, parsed.timer || {})
+        timer: Object.assign({}, defaultData.timer, parsed.timer || {}),
+        shelved: Array.isArray(parsed.shelved) ? parsed.shelved : []
       });
     } catch (e) {
       return JSON.parse(JSON.stringify(defaultData));
@@ -838,6 +876,12 @@
     const m = String(Math.floor(s / 60)).padStart(2, "0");
     const sec = String(s % 60).padStart(2, "0");
     timeText.textContent = `${m}:${sec}`;
+  }
+
+  function realElapsedSec() {
+    let s = data.timer.elapsedSec || 0;
+    if (data.timer.sessionStartAt) s += (Date.now() - data.timer.sessionStartAt) / 1000;
+    return s;
   }
 
   // Sound notification
@@ -895,6 +939,10 @@
     data.timer.running = false;
     data.timer.endAt = null;
     data.timer.totalSeconds = 0;
+    if (data.timer.sessionStartAt) {
+      data.timer.elapsedSec += (Date.now() - data.timer.sessionStartAt) / 1000;
+      data.timer.sessionStartAt = null;
+    }
     save();
     ensureAudio();
     playChime();
@@ -907,6 +955,8 @@
     ensureAudio();
     data.timer.running = true;
     data.timer.endAt = Date.now() + data.timer.totalSeconds * 1000;
+    if (!data.timer.sessionStartAt) data.timer.sessionStartAt = Date.now();
+    if (!data.timer.sessionStartClock) data.timer.sessionStartClock = Date.now();
     save();
     timerId = setInterval(tick, 1000);
   });
@@ -926,6 +976,10 @@
     if (data.timer.running && data.timer.endAt) {
       data.timer.totalSeconds = Math.max(0, Math.round((data.timer.endAt - Date.now()) / 1000));
     }
+    if (data.timer.sessionStartAt) {
+      data.timer.elapsedSec += (Date.now() - data.timer.sessionStartAt) / 1000;
+      data.timer.sessionStartAt = null;
+    }
     data.timer.running = false;
     data.timer.endAt = null;
     save();
@@ -944,6 +998,9 @@
     timerId = null;
     data.timer.running = false;
     data.timer.endAt = null;
+    data.timer.elapsedSec = 0;
+    data.timer.sessionStartAt = null;
+    data.timer.sessionStartClock = null;
     const val = Math.max(1, parseInt(timeInput.value) || 25);
     data.timer.baseSeconds = val * 60;
     data.timer.addedSeconds = 0;
@@ -955,6 +1012,9 @@
   timeInput.addEventListener("change", () => {
     if (data.timer.running) return;
     data.timer.endAt = null;
+    data.timer.elapsedSec = 0;
+    data.timer.sessionStartAt = null;
+    data.timer.sessionStartClock = null;
     const val = Math.max(1, parseInt(timeInput.value) || 25);
     data.timer.baseSeconds = val * 60;
     data.timer.addedSeconds = 0;
@@ -980,7 +1040,8 @@
       card.innerHTML = `
         <div class="task-top">
           <div class="status-circle ${todo.done ? "done" : ""}" data-idx="${idx}"></div>
-          <div class="task-name">${escapeHtml(todo.name)}</div>
+          <span class="type-tag ${todo.type === "small" ? "small" : ""}">${todo.type === "small" ? "小" : "大"}</span>
+          <div class="task-name ${todo.type === "small" ? "small" : ""}">${escapeHtml(todo.name)}</div>
           <div class="task-minutes">${todo.totalMin} 分钟</div>
           <button class="task-delete" data-del="${idx}">×</button>
         </div>
@@ -1031,12 +1092,22 @@
     activeTaskBox.innerHTML = `
       <div class="task-card active">
         <div class="task-top">
+          <span class="type-tag ${todo.type === "small" ? "small" : ""}">${todo.type === "small" ? "小" : "大"}</span>
           <div class="task-name">${escapeHtml(todo.name)}</div>
           <div class="task-minutes">${todo.totalMin} 分钟</div>
         </div>
       </div>
     `;
   }
+
+  let newTodoType = "big";
+  document.querySelectorAll(".type-pick-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".type-pick-btn").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      newTodoType = b.dataset.tp;
+    });
+  });
 
   addTodoBtn.addEventListener("click", () => {
     const name = todoInput.value.trim();
@@ -1045,7 +1116,8 @@
       name,
       totalMin: 0,
       done: false,
-      review: ""
+      review: "",
+      type: newTodoType
     });
     data.activeTodoIndex = data.todos.length - 1;
     todoInput.value = "";
@@ -1066,11 +1138,16 @@
     }
     [...data.done].reverse().forEach((item, i) => {
       const idx = data.done.length - 1 - i;
+      const type = item.type || "big";
       const div = document.createElement("div");
       div.className = "done-item";
       div.innerHTML = `
-        <span>${escapeHtml(item.taskName)} · ${escapeHtml(item.subName)}</span>
+        <span>
+          <span class="type-tag ${type === "small" ? "small" : ""}">${type === "small" ? "小" : "大"}</span>
+          <span class="done-name ${type === "small" ? "small" : ""}">${escapeHtml(item.taskName)} · ${escapeHtml(item.subName)}</span>
+        </span>
         <span class="done-right">
+          <span class="rec-range">${formatRange(item.startTime, item.endTime)}</span>
           <span class="done-min">${item.min} 分钟</span>
           <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
         </span>
@@ -1109,9 +1186,7 @@
       alert("🐟 请填写本轮内容");
       return;
     }
-    const totalAvailable = data.timer.baseSeconds + data.timer.addedSeconds;
-    const usedSec = Math.max(1, totalAvailable - data.timer.totalSeconds);
-    const usedMin = Math.max(1, Math.round(usedSec / 60));
+    const usedMin = Math.max(1, Math.round(realElapsedSec() / 60));
 
     const todo = data.todos[data.activeTodoIndex];
     todo.totalMin += usedMin;
@@ -1122,14 +1197,119 @@
       subName,
       min: usedMin,
       date: formatDate(now),
-      timestamp: now.getTime()
+      timestamp: now.getTime(),
+      type: todo.type || "big",
+      startTime: data.timer.sessionStartClock || null,
+      endTime: now.getTime()
     });
 
     subTaskInput.value = "";
+    data.timer.elapsedSec = 0;
+    data.timer.sessionStartAt = null;
+    data.timer.sessionStartClock = null;
     save();
     renderTodos();
     renderDone();
+    renderShelved();
     alert(`🐟 已记录：${usedMin} 分钟`);
+  });
+
+  // Shelve（搁置待续任务）
+  const shelveBtn = document.getElementById("shelveBtn");
+  const shelveCard = document.getElementById("shelveCard");
+  const shelvedList = document.getElementById("shelvedList");
+
+  function renderShelved() {
+    shelveCard.style.display = data.shelved.length ? "block" : "none";
+    shelvedList.innerHTML = "";
+    data.shelved.forEach((s, i) => {
+      const div = document.createElement("div");
+      div.className = "shelved-item";
+      div.innerHTML = `
+        <div class="shelved-main">
+          <span class="type-tag ${s.type === "small" ? "small" : ""}">${s.type === "small" ? "小" : "大"}</span>
+          <span class="shelved-name ${s.type === "small" ? "small" : ""}">${escapeHtml(s.taskName)}</span>
+          <span class="shelved-sub">${escapeHtml(s.subName)}</span>
+        </div>
+        <div class="shelved-meta">已专注 ${Math.max(1, Math.round(s.elapsedSec / 60))} 分钟</div>
+        <div class="shelved-actions">
+          <button class="btn btn-ghost btn-small" data-sresume="${i}">▶ 继续</button>
+          <button class="btn btn-ghost btn-small" data-sdrop="${i}">✕ 丢弃</button>
+        </div>
+      `;
+      shelvedList.appendChild(div);
+    });
+  }
+
+  shelvedList.addEventListener("click", e => {
+    const resumeBtn = e.target.closest("[data-sresume]");
+    const dropBtn = e.target.closest("[data-sdrop]");
+    if (resumeBtn) {
+      const i = Number(resumeBtn.dataset.sresume);
+      const s = data.shelved[i];
+      if (!s) return;
+      if (!data.todos[s.activeTodoIndex]) {
+        alert("🐟 这个任务已经被删掉了，先重新添加吧");
+        data.shelved.splice(i, 1);
+        save();
+        renderShelved();
+        return;
+      }
+      data.activeTodoIndex = s.activeTodoIndex;
+      data.timer.elapsedSec = s.elapsedSec || 0;
+      data.timer.sessionStartAt = null;
+      data.timer.sessionStartClock = s.startClock || Date.now();
+      subTaskInput.value = s.subName || "";
+      data.shelved.splice(i, 1);
+      save();
+      renderTodos();
+      renderShelved();
+      alert(`🐟 已继续「${s.taskName}」，计时已合并，继续加油～`);
+      return;
+    }
+    if (dropBtn) {
+      const i = Number(dropBtn.dataset.sdrop);
+      const s = data.shelved[i];
+      if (!s) return;
+      if (!confirm(`丢弃「${s.taskName} · ${s.subName}」这条待继续任务吗？已专注的 ${Math.max(1, Math.round(s.elapsedSec / 60))} 分钟不计入记录。`)) return;
+      data.shelved.splice(i, 1);
+      save();
+      renderShelved();
+    }
+  });
+
+  shelveBtn.addEventListener("click", () => {
+    if (data.activeTodoIndex === null) {
+      alert("🐟 请先选择一个任务");
+      return;
+    }
+    const todo = data.todos[data.activeTodoIndex];
+    data.shelved.push({
+      taskName: todo.name,
+      subName: subTaskInput.value.trim() || "（未填写内容）",
+      elapsedSec: realElapsedSec(),
+      type: todo.type || "big",
+      startClock: data.timer.sessionStartClock || Date.now(),
+      activeTodoIndex: data.activeTodoIndex
+    });
+    subTaskInput.value = "";
+    clearInterval(timerId);
+    timerId = null;
+    data.timer.running = false;
+    data.timer.endAt = null;
+    data.timer.elapsedSec = 0;
+    data.timer.sessionStartAt = null;
+    data.timer.sessionStartClock = null;
+    const val = Math.max(1, parseInt(timeInput.value) || 25);
+    data.timer.baseSeconds = val * 60;
+    data.timer.addedSeconds = 0;
+    data.timer.totalSeconds = val * 60;
+    updateDisplay();
+    data.activeTodoIndex = null;
+    save();
+    renderTodos();
+    renderShelved();
+    alert(`🐟 已搁置「${todo.name}」，先去做别的吧～`);
   });
 
   // Notes
@@ -1219,14 +1399,19 @@
       records.forEach(r => {
         const idx = data.done.indexOf(r);
         const todo = data.todos.find(t => t.name === r.taskName);
+        const type = r.type || "big";
         const status = todo ? (todo.done ? "✔" : "◯") : "·";
         const review = todo && todo.review ? todo.review : "暂无复盘";
         const item = document.createElement("div");
         item.className = "day-task-item";
         item.innerHTML = `
           <div class="day-task-name">
-            <span>${escapeHtml(r.taskName)} ${status} · ${escapeHtml(r.subName)}</span>
+            <span>
+              <span class="type-tag ${type === "small" ? "small" : ""}">${type === "small" ? "小" : "大"}</span>
+              <span class="done-name ${type === "small" ? "small" : ""}">${escapeHtml(r.taskName)} ${status} · ${escapeHtml(r.subName)}</span>
+            </span>
             <span class="done-right">
+              <span class="rec-range">${formatRange(r.startTime, r.endTime)}</span>
               <span style="color:var(--rose-500);font-size:13px;">${r.min}分钟</span>
               <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
             </span>
@@ -1311,30 +1496,33 @@
       return '<div class="p-empty">本月暂无记录</div>';
     }
 
-    const dayMap = {};
+    const dayGroups = {};
     monthRecords.forEach(r => {
-      if (!dayMap[r.date]) dayMap[r.date] = {};
-      if (!dayMap[r.date][r.taskName]) dayMap[r.date][r.taskName] = 0;
-      dayMap[r.date][r.taskName] += r.min;
+      if (!dayGroups[r.date]) dayGroups[r.date] = [];
+      dayGroups[r.date].push(r);
     });
 
     let totalMin = 0;
     let daysHTML = "";
-    Object.keys(dayMap).sort().forEach(date => {
+    Object.keys(dayGroups).sort().forEach(date => {
       const [yy, mm, dd] = date.split("-").map(Number);
       const d = new Date(yy, mm - 1, dd);
-      const dayTotal = Object.values(dayMap[date]).reduce((a, b) => a + b, 0);
+      const dayRecords = dayGroups[date];
+      const dayTotal = dayRecords.reduce((a, r) => a + r.min, 0);
       totalMin += dayTotal;
       let tasksHTML = "";
-      Object.keys(dayMap[date]).forEach(taskName => {
-        const todo = data.todos.find(t => t.name === taskName);
+      dayRecords.forEach(r => {
+        const todo = data.todos.find(t => t.name === r.taskName);
+        const type = r.type || (todo && todo.type) || "big";
         const status = todo ? (todo.done ? "done" : "doing") : "none";
         const statusChar = todo ? (todo.done ? "✔" : "◯") : "·";
         const review = todo && todo.review ? escapeHtml(todo.review) : "";
-        tasksHTML += '<div class="p-task">'
+        const range = formatRange(r.startTime, r.endTime);
+        tasksHTML += '<div class="p-task p-task-' + type + '">'
           + '<span class="p-status p-status-' + status + '">' + statusChar + '</span>'
-          + '<span class="p-name">' + escapeHtml(taskName) + '</span>'
-          + '<span class="p-min">' + dayMap[date][taskName] + '分钟</span>'
+          + '<span class="p-type-tag' + (type === "small" ? " p-type-tag-small" : "") + '">' + (type === "small" ? "小" : "大") + '</span>'
+          + '<span class="p-name">' + escapeHtml(r.taskName) + (r.subName ? ' · ' + escapeHtml(r.subName) : '') + '</span>'
+          + '<span class="p-min">' + (range ? range + ' · ' : '') + r.min + '分钟</span>'
           + (review ? '<div class="p-review">复盘：' + review + '</div>' : '')
           + '</div>';
       });
@@ -1348,15 +1536,17 @@
         + '</div>';
     });
 
-    const days = Object.keys(dayMap).length;
+    const days = Object.keys(dayGroups).length;
     return '<div class="p-page">'
       + '<div class="p-title">🐟 ' + cnM[m - 1] + '专注汇总</div>'
-      + '<div class="p-sub">' + y + '年 · 共 ' + totalMin + ' 分钟 · ' + days + ' 天</div>'
+      + '<div class="p-sub">' + y + '年 · 共 ' + monthRecords.length + ' 条 · ' + totalMin + ' 分钟 · ' + days + ' 天</div>'
       + daysHTML
       + '<div class="p-legend">'
       + '<span><span class="p-status p-status-done">✔</span> 已完成</span>'
       + '<span><span class="p-status p-status-doing">◯</span> 进行中</span>'
       + '<span><span class="p-status p-status-none">·</span> 未登记</span>'
+      + '<span><span class="p-type-tag">大</span> 大任务</span>'
+      + '<span><span class="p-type-tag p-type-tag-small">小</span> 小任务</span>'
       + '</div>'
       + '</div>';
   }
@@ -1389,6 +1579,18 @@
     }[c]));
   }
 
+  function fmtHM(ms) {
+    if (!ms) return "";
+    const d = new Date(ms);
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+
+  function formatRange(s, e) {
+    const a = fmtHM(s);
+    const b = fmtHM(e);
+    return a && b ? a + "-" + b : "";
+  }
+
   // Init
   timeInput.value = Math.round(data.timer.baseSeconds / 60) || 25;
   updateDisplay();
@@ -1401,6 +1603,7 @@
   renderTodos();
   renderDone();
   renderCalendar();
+  renderShelved();
 })();
 </script>
 </body>
