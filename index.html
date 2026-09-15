@@ -360,19 +360,25 @@
   }
 
   .done-del {
-    background: none;
+    background: var(--pink-100);
     border: none;
-    color: #E5547D;
-    font-size: 14px;
+    color: var(--rose-500);
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1;
     cursor: pointer;
-    padding: 2px 5px;
-    border-radius: 8px;
-    opacity: 0.75;
+    padding: 6px 10px;
+    border-radius: 10px;
+    opacity: 0.9;
+    flex-shrink: 0;
   }
   .done-del:hover {
     opacity: 1;
-    background: var(--pink-100);
+    background: var(--pink-200);
+  }
+  .day-task-del {
+    text-align: right;
+    margin-top: 8px;
   }
 
   /* Calendar */
@@ -1437,7 +1443,7 @@
           <span class="done-right">
             <span class="rec-range">${formatRange(item.startTime, item.endTime)}</span>
             <span class="done-min">${item.min > 0 ? item.min + " 分钟" : "未计时"}</span>
-            <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
+            <button class="done-del" data-idx="${idx}" title="删除这条记录">删除</button>
           </span>
         `;
         doneList.appendChild(div);
@@ -1712,10 +1718,10 @@
             <span class="done-right">
               <span class="rec-range">${formatRange(r.startTime, r.endTime)}</span>
               <span style="color:var(--rose-500);font-size:13px;">${r.min > 0 ? r.min + "分钟" : "未计时"}</span>
-              <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
             </span>
           </div>
           <div class="day-task-review">${escapeHtml(review)}</div>
+          <div class="day-task-del"><button class="done-del" data-idx="${idx}" title="删除这条记录">删除</button></div>
         `;
         dayModalContent.appendChild(item);
       });
