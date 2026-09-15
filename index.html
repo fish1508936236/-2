@@ -1104,9 +1104,26 @@
       if (e.target.classList.contains("status-circle")) {
         e.stopPropagation();
         todo.done = !todo.done;
-        if (todo.done && data.activeTodoIndex === idx) data.activeTodoIndex = null;
-        if (todo.done && todo.type === "big") {
-          data.todos.forEach(t => { if (t.parent === todo.id) t.parent = null; });
+        if (todo.done) {
+          todo.doneAt = Date.now();
+          if (data.activeTodoIndex === idx) data.activeTodoIndex = null;
+          if (todo.type === "big") {
+            data.todos.forEach(t => { if (t.parent === todo.id) t.parent = null; });
+          }
+          // 未计时完成也进日历（当天尚无记录时）
+          const today = formatDate(new Date());
+          if (!data.done.some(r => r.taskName === todo.name && r.date === today)) {
+            data.done.push({
+              taskName: todo.name,
+              subName: "（未计时完成）",
+              min: 0,
+              date: today,
+              timestamp: Date.now(),
+              type: todo.type || "big",
+              startTime: null,
+              endTime: Date.now()
+            });
+          }
         }
         save();
         renderTodos();
@@ -1249,11 +1266,18 @@
   let archivedOpen = false;
 
   function renderArchived() {
+    // 昨天及更早归档的任务自动清空（记录保留在月历）
+    const todayStr = formatDate(new Date());
+    const stale = data.todos.filter(t => t.done && formatDate(new Date(t.doneAt || 0)) !== todayStr);
+    if (stale.length) {
+      stale.forEach(t => { const i = data.todos.indexOf(t); if (i >= 0) data.todos.splice(i, 1); });
+      save();
+    }
     const archived = data.todos.filter(t => t.done);
     if (!archived.length) return;
     const head = document.createElement("div");
     head.className = "arch-head";
-    head.innerHTML = `<span>🗂 已归档（${archived.length}）</span><span class="arch-arrow">${archivedOpen ? "▾" : "▸"}</span>`;
+    head.innerHTML = `<span>🗂 今天已归档（${archived.length}）</span><span class="arch-arrow">${archivedOpen ? "▾" : "▸"}</span>`;
     head.addEventListener("click", () => { archivedOpen = !archivedOpen; renderTodos(); });
     todoList.appendChild(head);
     if (!archivedOpen) return;
@@ -1275,6 +1299,7 @@
         if (e.target.classList.contains("task-restore")) {
           e.stopPropagation();
           todo.done = false;
+          todo.doneAt = null;
           save();
           renderTodos();
           return;
@@ -1411,7 +1436,7 @@
           </span>
           <span class="done-right">
             <span class="rec-range">${formatRange(item.startTime, item.endTime)}</span>
-            <span class="done-min">${item.min} 分钟</span>
+            <span class="done-min">${item.min > 0 ? item.min + " 分钟" : "未计时"}</span>
             <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
           </span>
         `;
@@ -1686,7 +1711,7 @@
             </span>
             <span class="done-right">
               <span class="rec-range">${formatRange(r.startTime, r.endTime)}</span>
-              <span style="color:var(--rose-500);font-size:13px;">${r.min}分钟</span>
+              <span style="color:var(--rose-500);font-size:13px;">${r.min > 0 ? r.min + "分钟" : "未计时"}</span>
               <button class="done-del" data-idx="${idx}" title="删除这条记录">✕</button>
             </span>
           </div>
@@ -1796,7 +1821,7 @@
           + '<span class="p-status p-status-' + status + '">' + statusChar + '</span>'
           + '<span class="p-type-tag' + (type === "small" ? " p-type-tag-small" : "") + '">' + (type === "small" ? "小" : "大") + '</span>'
           + '<span class="p-name">' + escapeHtml(r.taskName) + (r.subName ? ' · ' + escapeHtml(r.subName) : '') + '</span>'
-          + '<span class="p-min">' + (range ? range + ' · ' : '') + r.min + '分钟</span>'
+          + '<span class="p-min">' + (range ? range + ' · ' : '') + (r.min > 0 ? r.min + '分钟' : '未计时') + '</span>'
           + (review ? '<div class="p-review">复盘：' + review + '</div>' : '')
           + '</div>';
       });
